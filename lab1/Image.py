@@ -4,13 +4,13 @@ import numpy as np
 class Image:
     name: str
     data: np.ndarray = np.zeros(1)
-    shape: np.ndarray = np.zeros(1)
+    shape: tuple
     color_scheme: int
     
     def __init__(self,
-                 filepath: str = None,
-                 data: np.ndarray = None,
-                 name: str = None):
+                 filepath: str = '',
+                 data: np.ndarray = np.zeros(1),
+                 name: str = ''):
         if (filepath is None) and (data is None):
             raise RuntimeError("Neither the file path nor the file data were provided")
         
