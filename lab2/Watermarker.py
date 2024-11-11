@@ -15,10 +15,17 @@ class Watermarker:
     @staticmethod
     def insert_watermark2(fft_matrix: np.ndarray) -> np.ndarray:
         watermarked_fft = np.copy(fft_matrix)
-        indices, length = Watermarker.get_indices_for_insertion_and_vector_length(watermarked_fft)
-       
-        random_values = OmegaVectorGenerator.generate(length)
-        watermarked_fft.real[indices[:, 0], indices[:, 1]] *= (1 + alpha * random_values)
+        
+        medium_frequency_slice = watermarked_fft[256:281, ((512 - 40) // 2):((512 - 40) // 2) + 40]
+        slice_indices = Watermarker.zigzag_indices(medium_frequency_slice)
+        
+        rand_nums = np.zeros(10240)
+        for i in range(len(slice_indices)):
+            rand_num = np.random.normal(mean, std)
+            watermarked_fft[slice_indices[i]] += alpha * np.abs(watermarked_fft[slice_indices[i]]) * rand_num
+            rand_nums[i] = rand_num
+        
+        np.save("omega_vector2.npy",rand_nums)
         return watermarked_fft
     
     @staticmethod
@@ -40,11 +47,11 @@ class Watermarker:
         return watermarked_fft[quarter_indices[:, 0], quarter_indices[:, 1]]
     
     @staticmethod
-    def zigzag_scan(matrix):
+    def zigzag_indices(matrix):
         # Размеры матрицы
         rows, cols = matrix.shape
         
-        # Результат зигзагообразной развертки
+        # Результат зигзагообразной развертки индексов
         result = []
         
         # Индексы для обхода матрицы
@@ -54,7 +61,7 @@ class Watermarker:
         up = True
         
         while i < rows and j < cols:
-            result.append(matrix[i, j])
+            result.append((i, j))
             
             # Движение вверх-вправо
             if up:
